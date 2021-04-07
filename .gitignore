@@ -1,0 +1,19 @@
+# Logs
+logs
+*.log
+
+# Runtime reports
+results
+reports
+html-report
+temp
+
+# Output of 'npm pack'
+*.tgz
+*.zip
+
+# taurus runtime artifacts folder(s)
+*-*-*_*-*-*.*
+
+# maven runtime artifacts
+target

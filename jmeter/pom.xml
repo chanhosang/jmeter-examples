@@ -1,0 +1,126 @@
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.demo</groupId>
+	<artifactId>jmeter-performance</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<description>Performance Test</description>
+	<packaging>pom</packaging>
+	<name>jmeter-performance</name>
+	<url>http://maven.apache.org</url>
+	<properties>
+		<granularity>10000</granularity>
+		<test.src.directory>src/test/jmeter</test.src.directory>
+		<testsuite>performance</testsuite>
+		<!--  JMeter Maven Plugin - JVM Setting for JMeter Process -->
+		<jMeterProcessJVMSettings.xms>128</jMeterProcessJVMSettings.xms>
+		<jMeterProcessJVMSettings.xmx>512</jMeterProcessJVMSettings.xmx>
+		<!-- Library Version -->
+		<jmeter-maven-plugin.version>2.9.0</jmeter-maven-plugin.version>
+		<maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
+		<jmeter-plugins-webdriver.version>3.0</jmeter-plugins-webdriver.version>
+		<groovy-all.version>2.4.16</groovy-all.version>
+	</properties>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.lazerycode.jmeter</groupId>
+				<artifactId>jmeter-maven-plugin</artifactId>
+				<version>${jmeter-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>jmeter-tests</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jmeter</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<testResultsTimestamp>false</testResultsTimestamp>
+					<testFilesDirectory>${test.src.directory}/${testsuite}/</testFilesDirectory>
+					<testFilesIncluded>
+						<testFilesIncluded>${project}.jmx</testFilesIncluded>
+					</testFilesIncluded>
+					<propertiesUser>
+						<!--User Defined Variable-->
+						<threadgroup.host>${host}</threadgroup.host>
+                        <!--thread setting-->
+						<threadgroup.numberOfThreads>${numberOfThreads}</threadgroup.numberOfThreads>
+						<threadgroup.rampUp>${rampUp}</threadgroup.rampUp>
+						<threadgroup.loopCount>${loopCount}</threadgroup.loopCount>
+                        <!-- overide property value in user.properties -->
+						<jmeter.reportgenerator.overall_granularity>${granularity}</jmeter.reportgenerator.overall_granularity>
+					</propertiesUser>
+					<jMeterProcessJVMSettings>
+						<xms>${jMeterProcessJVMSettings.xms}</xms>
+						<xmx>${jMeterProcessJVMSettings.xmx}</xmx>
+					</jMeterProcessJVMSettings>
+					<generateReports>true</generateReports>
+					<jmeterExtensions>
+					  <artifacts>kg.apc:jmeter-plugins-webdriver:${jmeter-plugins-webdriver.version}</artifacts>
+                    </jmeterExtensions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>${maven-dependency-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>copy-dependencies</id>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.directory}/jmeter/lib/ext</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<!-- Specify the version (2.4.13) of groovy-all. If not it will default to older version of 2.4.7 and results in uncaught exception:
+		     groovy-all is loaded in version 2.4.13 and you are trying to load version 2.4.7 -->
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-all</artifactId>
+			<version>${groovy-all.version}</version>
+			<type>pom</type>
+		</dependency>
+	</dependencies>
+	<profiles>
+		<!--
+            Example,
+            mvn clean verify -P jmeter_load_test_purchase_product -f pom.xml \
+            -DnumberOfThreads=1 -DloopCount=1 -DrampUp=1 \
+		-->
+		<profile>
+			<id>jmeter_load_test_purchase_product</id>
+			<properties>
+				<project>jmeter_load_test_purchase_product</project>
+                <host>demoblaze.com</host>
+				<numberOfThreads>1</numberOfThreads>
+				<rampUp>1</rampUp>
+				<loopCount>1</loopCount>
+			</properties>
+		</profile>
+        <!--
+            Example,
+            mvn clean verify -P jmeter_load_test_login -f pom.xml \
+            -DnumberOfThreads=1 -DloopCount=1 -DrampUp=1 \
+		-->
+		<profile>
+			<id>jmeter_load_test_login</id>
+			<properties>
+				<project>jmeter_load_test_login</project>
+                <host>demoblaze.com</host>
+				<numberOfThreads>1</numberOfThreads>
+				<rampUp>1</rampUp>
+				<loopCount>1</loopCount>
+			</properties>
+		</profile>
+	</profiles>
+</project>

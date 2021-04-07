@@ -1,0 +1,70 @@
+# To demonstrate how to run simple load test
+#
+# For example,
+#   bzt scripts/bzt/jmeter-load-test.yml
+#   bzt scripts/bzt/jmeter-load-test.yml scripts/bzt/jmeter-load-test.yml
+# https://gettaurus.org/docs/ConfigSyntax/
+
+---
+settings:
+  env:
+    HOST: demoblaze.com
+    APP_USERNAME: hosang
+    APP_PASSWORD: 123456
+    # ONLY for jp@gc - Remote Driver Config
+    # Please specify the actual location of the dowloaded chrome driver via command line.
+    # CHROME_DRIVER_LOCATION: chromedriver.exe
+    JMETER_NAME_1: jmeter_load_test_login
+    JMETER_NAME_2: jmeter_load_test_purchase_product
+
+execution:
+
+# primary scenario
+- executor: jmeter
+  scenario: SCENARIO-PRODUCT-PURCHASE
+  concurrency: 2
+  ramp-up: 10s
+  iterations: 5
+
+# secondary scenario
+- executor: jmeter
+  scenario: SCENARIO-PRODUCT-STORE
+  concurrency: 1
+  ramp-up: 1s
+  hold-for: 1m # iterations: 1
+
+modules:
+  # A flag to run scenarios in parallel or sequential
+  local:
+    sequential: false  # false by default
+  jmeter:
+    # path: ~/.bzt/jmeter-taurus/{version}
+    # download-link: https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-{version}.zip
+    # version: 5.2
+    force-ctg: true   # true by default
+    detect-plugins: true
+    csv-jtl-flags:
+      saveAssertionResultsFailureMessage: true
+      sentBytes: true
+  blazemeter:
+    project: BlazeMeter - Product Store
+    report-name: Load Test
+    # token: <api-key-id>:<api-key-secret>
+
+scenarios:
+  SCENARIO-PRODUCT-STORE:
+    variables:
+      HOST: ${HOST}
+      APP_USERNAME: ${APP_USERNAME}
+      APP_PASSWORD: ${APP_PASSWORD}
+
+    script: jmeter/src/test/jmeter/performance/${JMETER_NAME_1}.jmx
+
+  SCENARIO-PRODUCT-PURCHASE:
+    variables:
+      HOST: ${HOST}
+      APP_USERNAME: ${APP_USERNAME}
+      APP_PASSWORD: ${APP_PASSWORD}
+
+    script: jmeter/src/test/jmeter/performance/${JMETER_NAME_2}.jmx
+
